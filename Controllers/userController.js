@@ -1,8 +1,8 @@
-const user = require('../Models/userModel');
-const bcrypt = require('bcrypt')
-const { validationResult } = require('express-validator');
-const jwt = require('jsonwebtoken')
-const cookieParser = require('cookie-parser');
+const user = require("../Models/userModel");
+const bcrypt = require("bcrypt");
+const { validationResult } = require("express-validator");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 
 // ============================
 // Get All Users
@@ -16,7 +16,6 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-
 // ============================
 // Register User
 // ============================
@@ -25,7 +24,7 @@ const registerUser = async (req, res) => {
 
   if (!errors.isEmpty()) {
     return res.status(400).json({
-      errors: errors.array().map(err => err.msg)
+      errors: errors.array().map((err) => err.msg),
     });
   }
 
@@ -39,22 +38,18 @@ const registerUser = async (req, res) => {
     }
 
     // 🔥 Create new user
-    let hashPassword = bcrypt.hashSync(data.password,10)
-    const User = await user.create({...data,password:hashPassword});
+    let hashPassword = bcrypt.hashSync(data.password, 10);
+    const User = await user.create({ ...data, password: hashPassword });
     console.log(User);
-    
 
     return res.status(200).json({
       message: "User registered successfully",
-      user: User
+      user: User,
     });
-
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
-
-
 
 // ============================
 // Login User
@@ -72,27 +67,26 @@ const LoginUser = async (req, res) => {
     }
 
     // 🔥 Compare password
-    
+
     const comparePassword = bcrypt.compareSync(password, User.password);
     console.log(comparePassword);
 
     if (!comparePassword) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
-    
-    let token = jwt.sign({id: User._id},'secret')
+
+    let token = jwt.sign({ id: User._id }, process.env.JWT_SECRET);
 
     //send token in cookie
-    res.cookie('token',token,{
-      httpOnly:true,
-      expires:new Date(Date.now()+24*60*60*1000)
-    })
+    res.cookie("token", token, {
+      httpOnly: true,
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
 
     return res.status(200).json({
       message: "Login successful",
-      user: User
+      user: User,
     });
-
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -101,11 +95,11 @@ const LoginUser = async (req, res) => {
 const getMe = async (req, res) => {
   const User = await user.findById(req.userId).select("-password");
   res.json({ user: User });
-}
+};
 
 const logoutUser = (req, res) => {
-    res.clearCookie("token");
-    return res.status(200).json({ message: "Logged out successfully" });
-}
+  res.clearCookie("token");
+  return res.status(200).json({ message: "Logged out successfully" });
+};
 
 module.exports = { getAllUsers, registerUser, LoginUser, getMe, logoutUser };
