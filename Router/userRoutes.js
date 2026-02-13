@@ -12,7 +12,7 @@ router.get('/',getAllUsers);
 router.post('/register',validateUser,registerUser);
 router.post('/login', LoginUser)
 router.get("/me", auth, getMe);
-router.post("/logout", auth,logoutUser);
+router.post("/logout",auth,logoutUser);
 
 
 module.exports = router;
